@@ -40,7 +40,6 @@ public class HomePage extends AppCompatActivity
 
     private static final String ANONYMOUS = "Anonymous";
     private ArrayList<LinkClass> links;
-    private MyAdapter mLinksAdapter;
 
     private FirebaseDatabase mFirebaseDatabase;
     private DatabaseReference mDatabaseReference;
@@ -94,7 +93,6 @@ public class HomePage extends AppCompatActivity
 
 
         links = new ArrayList<>();
-        mLinksAdapter = new MyAdapter(links);
 
         List<String> words = new ArrayList<>();
         words.add("Madhu");
@@ -289,24 +287,24 @@ public class HomePage extends AppCompatActivity
     public void setItem(int index, LinkClass item)
     {
         links.set(index, item);
-        mLinksAdapter.notifyItemChanged(index);
+        //mLinksAdapter.notifyItemChanged(index);
     }
     // Use this to add an item
     public void addItem(LinkClass item)
     {
         links.add(item);
-        mLinksAdapter.notifyItemInserted(links.size() - 1);
+        //mLinksAdapter.notifyItemInserted(links.size() - 1);
     }
     // Use this to remove an item
     public void removeItem(int index)
     {
         links.remove(index);
-        mLinksAdapter.notifyItemRemoved(index);
+        //mLinksAdapter.notifyItemRemoved(index);
     }
 
     public void clearItems(){
         links.clear();
-        mLinksAdapter.notifyDataSetChanged();
+        //mLinksAdapter.notifyDataSetChanged();
     }
 
     public void insertView(View view){

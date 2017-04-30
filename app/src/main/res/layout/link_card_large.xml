@@ -19,15 +19,15 @@
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@color/buttonAccent"
-                android:layout_margin="8dp"
+                android:background="@drawable/demo_img"
+                android:layout_margin="0dp"
                 android:scaleType="centerCrop"
                 android:id="@+id/link_image"/>
 
             <ImageView
                 android:layout_width="20dp"
                 android:layout_height="20dp"
-                android:layout_margin="16dp"
+                android:layout_margin="8dp"
                 android:id="@+id/favicon"
                 android:background="@drawable/ic_not_fav"
                 android:layout_alignParentBottom="true"
