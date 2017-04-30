@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="com.madhu_bookmarks_manager.bookmarksmanager.HomePage"
+    >
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:text="All Bookmarks"
+        android:textSize="24sp"
+        android:padding="8dp"
+        android:id="@+id/bookmarks_title"
+        android:textColor="@android:color/black"
+        android:textStyle="bold"
+        android:text="All Bookmarks"
+        />
+
+    <ListView
+        android:id="@+id/list_item"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/bookmarks_title"
+        />
+
+</RelativeLayout>

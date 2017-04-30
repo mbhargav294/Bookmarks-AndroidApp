@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "93488013404",
+    "firebase_url": "https://bookmarkmanager-f7cdc.firebaseio.com",
+    "project_id": "bookmarkmanager-f7cdc",
+    "storage_bucket": "bookmarkmanager-f7cdc.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:93488013404:android:0b1ca527c792f340",
+        "android_client_info": {
+          "package_name": "com.madhu_bookmarks_manager.bookmarksmanager"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "93488013404-o62qea70cvn0leotijf00rdf0b6no2bv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.madhu_bookmarks_manager.bookmarksmanager",
+            "certificate_hash": "edaafd5f6c686d4fee42a0d1a84867c36d7d7a8e"
+          }
+        },
+        {
+          "client_id": "93488013404-jr8aait0al1tga7ln1msveijkebc8ud6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB4DiPmaQST4-PMbaz3e9S01_xF3N_ThN4"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "93488013404-jr8aait0al1tga7ln1msveijkebc8ud6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

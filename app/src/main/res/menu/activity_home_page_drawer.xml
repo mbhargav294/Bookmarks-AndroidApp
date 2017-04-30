@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:title="Categories">
+        <menu>
+            <item
+                android:id="@+id/nav_home"
+                android:icon="@drawable/ic_home"
+                android:title="Home" />
+            <item
+                android:id="@+id/nav_videos"
+                android:icon="@drawable/ic_video"
+                android:title="Videos" />
+            <item
+                android:id="@+id/nav_images"
+                android:icon="@drawable/ic_images"
+                android:title="Images" />
+            <item
+                android:id="@+id/nav_pages"
+                android:icon="@drawable/ic_pages"
+                android:title="Pages" />
+        </menu>
+    </item>
+
+    <item android:title="Settings">
+        <menu>
+            <item
+                android:id="@+id/settings"
+                android:icon="@drawable/ic_settings"
+                android:title="Settings" />
+            <item
+                android:id="@+id/nav_share"
+                android:icon="@drawable/ic_menu_share"
+                android:title="Share" />
+            <item
+                android:id="@+id/sign_out"
+                android:icon="@drawable/ic_logout"
+                android:title="Sign out" />
+        </menu>
+    </item>
+
+</menu>
