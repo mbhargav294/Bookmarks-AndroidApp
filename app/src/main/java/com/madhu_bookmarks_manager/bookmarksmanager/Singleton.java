@@ -33,6 +33,15 @@ class Singleton {
      **************************/
     private ArrayList<BasicLinkInfo> mAllLinks;
     private HashMap<String, String> mLinksMap;
+
+    public ArrayList<BasicLinkInfo> getmFavouritesList() {
+        return mFavouritesList;
+    }
+
+    public void setmFavouritesList(ArrayList<BasicLinkInfo> mFavouritesList) {
+        this.mFavouritesList = mFavouritesList;
+    }
+
     private ArrayList<BasicLinkInfo> mFavouritesList;
     private ArrayList<BasicLinkInfo> mYoutubeList;
     private ArrayList<BasicLinkInfo> mWikiList;

@@ -8,17 +8,21 @@
                 android:icon="@drawable/ic_home"
                 android:title="Home" />
             <item
-                android:id="@+id/nav_videos"
+                android:id="@+id/nav_youtube"
                 android:icon="@drawable/ic_video"
                 android:title="YouTube" />
             <item
-                android:id="@+id/nav_images"
-                android:icon="@drawable/ic_images"
+                android:id="@+id/nav_wiki"
+                android:icon="@drawable/ic_pages"
                 android:title="Wikipedia" />
             <item
-                android:id="@+id/nav_pages"
-                android:icon="@drawable/ic_pages"
+                android:id="@+id/nav_stack"
+                android:icon="@drawable/stack"
                 android:title="StackExchange" />
+            <item
+                android:id="@+id/nav_favourites"
+                android:icon="@drawable/ic_fav"
+                android:title="Favourites"/>
         </menu>
     </item>
 
@@ -28,10 +32,6 @@
                 android:id="@+id/settings"
                 android:icon="@drawable/ic_settings"
                 android:title="Settings" />
-            <item
-                android:id="@+id/nav_share"
-                android:icon="@drawable/ic_menu_share"
-                android:title="Share" />
             <item
                 android:id="@+id/sign_out"
                 android:icon="@drawable/ic_logout"

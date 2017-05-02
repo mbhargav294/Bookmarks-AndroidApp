@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.madhu_bookmarks_manager.bookmarksmanager.FavouritesView">
+
+    <ListView
+        android:id="@+id/list_item_favs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="8sp"
+        android:stackFromBottom="false"
+        android:paddingBottom="54dp"
+        android:clipToPadding="false"
+        android:listSelector="@drawable/listselector"
+        />
+
+</android.support.constraint.ConstraintLayout>

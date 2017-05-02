@@ -3,7 +3,6 @@
           package="com.madhu_bookmarks_manager.bookmarksmanager">
 
     <uses-permission android:name="android.permission.INTERNET"/>
-
     <uses-permission android:name="android.permission.VIBRATE"/>
     <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
     <uses-permission android:name="android.permission.READ_PROFILE"/>
@@ -24,21 +23,28 @@
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
+
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND"/>
+
                 <category android:name="android.intent.category.DEFAULT"/>
+
                 <data android:mimeType="image/*"/>
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND"/>
+
                 <category android:name="android.intent.category.DEFAULT"/>
+
                 <data android:mimeType="text/plain"/>
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND_MULTIPLE"/>
+
                 <category android:name="android.intent.category.DEFAULT"/>
+
                 <data android:mimeType="image/*"/>
             </intent-filter>
         </activity>
@@ -47,6 +53,8 @@
             android:label="@string/title_activity_individual_view"
             android:parentActivityName=".HomePage"
             android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+        <activity android:name=".FavouritesView">
         </activity>
     </application>
 

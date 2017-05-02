@@ -41,6 +41,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -100,6 +101,19 @@ public class HomePage extends AppCompatActivity
 
                 singleton.setmUser(firebaseAuth.getCurrentUser());
                 if(singleton.getmUser() != null) {
+                    Intent intent = getIntent();
+                    String action = intent.getAction();
+                    String type = intent.getType();
+
+                    if (Intent.ACTION_SEND.equals(action) && type != null) {
+                        if ("text/plain".equals(type)) {
+                            try {
+                                parseLinks(intent.toString()); // Handle text being sent
+                            } catch (IOException e) {
+                                Toast.makeText(HomePage.this, e.getMessage(), Toast.LENGTH_LONG).show();
+                            }
+                        }
+                    }
                     mProgressBar.setVisibility(ProgressBar.VISIBLE);
                     singleton.setmDatabaseReference(singleton.getmFirebaseDatabase()
                             .getReference()
@@ -206,20 +220,7 @@ public class HomePage extends AppCompatActivity
                             mEditText.clearFocus();
                             imm.toggleSoftInput(InputMethodManager.RESULT_HIDDEN, 0);
                             mEditText.setText("");
-                            Document d = Jsoup.connect(newLink).get();
-
-                            Element e1 = d.head().select("link[href~=.*\\.(ico|png)]").first();
-                            String logoURL = e1.attr("href");
-                            if (logoURL == null || logoURL.length() == 0) {
-                                Element e2 = d.head().select("meta[itemprop=image]").first();
-                                logoURL = e2.attr("itemprop");
-                            }
-
-                            BasicLinkInfo bLink = new BasicLinkInfo(newLink, d.title(), logoURL);
-                            String key = singleton.getmDatabaseReference().push().getKey();
-                            bLink.setPushKey(key);
-                            singleton.getmDatabaseReference().child(key).setValue(bLink);
-
+                            parseLinks(newLink);
                         } catch (Exception e) {
                             Toast.makeText(HomePage.this, e.getMessage(), Toast.LENGTH_LONG).show();
                             mEditText.requestFocus();
@@ -230,6 +231,22 @@ public class HomePage extends AppCompatActivity
             }
         });
 
+    }
+
+    private void parseLinks(String newLink) throws IOException {
+        Document d = Jsoup.connect(newLink).get();
+
+        Element e1 = d.head().select("link[href~=.*\\.(ico|png)]").first();
+        String logoURL = e1.attr("href");
+        if (logoURL == null || logoURL.length() == 0) {
+            Element e2 = d.head().select("meta[itemprop=image]").first();
+            logoURL = e2.attr("itemprop");
+        }
+
+        BasicLinkInfo bLink = new BasicLinkInfo(newLink, d.title(), logoURL);
+        String key = singleton.getmDatabaseReference().push().getKey();
+        bLink.setPushKey(key);
+        singleton.getmDatabaseReference().child(key).setValue(bLink);
     }
 
     private void attachDatabaseReadListener(){
@@ -364,14 +381,15 @@ public class HomePage extends AppCompatActivity
         int id = item.getItemId();
         if (id == R.id.nav_home) {
 
-        } else if (id == R.id.nav_videos) {
+        } else if (id == R.id.nav_youtube) {
 
-        } else if (id == R.id.nav_images) {
+        } else if (id == R.id.nav_wiki) {
 
-        } else if (id == R.id.nav_pages) {
+        } else if (id == R.id.nav_stack) {
 
-        } else if (id == R.id.nav_share) {
-
+        } else if(id == R.id.nav_favourites){
+            Intent intent = new Intent(HomePage.this, FavouritesView.class);
+            startActivity(intent);
         } else if (id == R.id.settings){
 
         }
