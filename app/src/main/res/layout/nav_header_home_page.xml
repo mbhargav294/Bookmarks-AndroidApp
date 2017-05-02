@@ -13,20 +13,15 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     android:theme="@style/ThemeOverlay.AppCompat.Dark">
 
-    <com.joooonho.SelectableRoundedImageView
+
+    <de.hdodenhof.circleimageview.CircleImageView
         xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/user_image_view"
-        android:src="@android:drawable/sym_def_app_icon"
-        android:scaleType="centerCrop"
-        app:sriv_left_top_corner_radius="16dip"
-        app:sriv_right_top_corner_radius="0dip"
-        app:sriv_left_bottom_corner_radius="48dip"
-        app:sriv_right_bottom_corner_radius="16dip"
-        app:sriv_border_width="2dip"
-        app:sriv_border_color="@color/colorAccent"
-        app:sriv_oval="true"
+        android:layout_width="64dp"
         android:layout_height="64dp"
-        android:layout_width="64dp"/>
+        app:civ_border_width="2dp"
+        app:civ_border_color="#FF000000"
+        android:id="@+id/user_image_view"
+        android:src="@android:drawable/sym_def_app_icon"/>
 
     <TextView
         android:id="@+id/user_name_view"

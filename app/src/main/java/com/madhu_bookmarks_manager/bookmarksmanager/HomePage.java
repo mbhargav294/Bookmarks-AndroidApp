@@ -1,22 +1,30 @@
 package com.madhu_bookmarks_manager.bookmarksmanager;
 
+import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.StrictMode;
+import android.os.Vibrator;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.InputFilter;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,98 +35,78 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.joooonho.SelectableRoundedImageView;
 
-import java.util.ArrayList;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+
 import java.util.Arrays;
-import java.util.List;
+
+import de.hdodenhof.circleimageview.CircleImageView;
+
 
 public class HomePage extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener{
 
-    private static final String ANONYMOUS = "Anonymous";
-    private ArrayList<LinkClass> links;
-
-    private FirebaseDatabase mFirebaseDatabase;
-    private DatabaseReference mDatabaseReference;
-    private DatabaseReference mUserDatabaseReference;
-    private ChildEventListener mChildEvenListener;
-
-    private static final int RC_SIGN_IN = 1;
-    private FirebaseAuth mFirebaseAuth;
-    private FirebaseAuth.AuthStateListener mAuthStateListener;
-    private FirebaseUser mUser;
-
+    //All view objects
     private TextView mUserNameView;
     private TextView mEmailView;
-    private SelectableRoundedImageView mUserImageView;
+    private CircleImageView mUserImageView;
+    private ListView listView;
+    private EditText mEditText;
+    private ImageView mAddLinkButton;
+    private Vibrator myVib;
+    private InputMethodManager imm;
+    private ProgressBar mProgressBar;
 
-    String mUserName;
-    String mEmail;
-    Uri mImageUri;
+    //All custom variables
+    private static final String ANONYMOUS = "Anonymous";
+    private String mUserName;
+    private String mEmail;
+    private Uri mImageUri;
+    private String newLink;
+    private BasicLinkAdapter mBasicLinkAdapter;
+
+    private Singleton singleton;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_page);
 
-        this.setTitle("Homepage");
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        singleton = Singleton.getInstance();
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+        mProgressBar = (ProgressBar) findViewById(R.id.main_progress);
+        mProgressBar.setVisibility(ProgressBar.GONE);
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
-        toggle.syncState();
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
-
-        View headerLayout = navigationView.getHeaderView(0);
-        mUserNameView = (TextView) headerLayout.findViewById(R.id.user_name_view);
-        mEmailView = (TextView) headerLayout.findViewById(R.id.user_email_view);
-        mUserImageView = (SelectableRoundedImageView) headerLayout.findViewById(R.id.user_image_view);
+        listView = (ListView) findViewById(R.id.list_item);
+        mBasicLinkAdapter = new BasicLinkAdapter(this, R.layout.link_card_large, singleton.getmAllLinks());
+        listView.setAdapter(mBasicLinkAdapter);
 
 
-        links = new ArrayList<>();
+        singleton.setmFirebaseAuth(FirebaseAuth.getInstance());
+        singleton.setmFirebaseDatabase(FirebaseDatabase.getInstance());
 
-        List<String> words = new ArrayList<>();
-        words.add("Madhu");
-        words.add("Vyshnavi");
-
-        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, words);
-
-        ListView listView = (ListView) findViewById(R.id.list_item);
-
-        listView.setAdapter(itemsAdapter);
-
-        mFirebaseDatabase = FirebaseDatabase.getInstance();
-        mDatabaseReference = mFirebaseDatabase.getReference().child("users");
-
-        mFirebaseAuth = FirebaseAuth.getInstance();
-        mAuthStateListener = new FirebaseAuth.AuthStateListener() {
+        /************************
+         * Block for User Login *
+         ************************/
+        singleton.setmAuthStateListener(new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                mUser = firebaseAuth.getCurrentUser();
-                if(mUser != null) {
-                    //User is signed in
-                    mUserDatabaseReference = mDatabaseReference.child(mUser.getUid());
-                    OnSignedInInitialize(mUser);
-                    String link = "https://www.youtube.com/watch?v=OeEiNdAT7y8";
-                    //mUserDatabaseReference.push().setValue(link);
-                    //links.add(new LinkClass(link));
+
+                singleton.setmUser(firebaseAuth.getCurrentUser());
+                if(singleton.getmUser() != null) {
+                    mProgressBar.setVisibility(ProgressBar.VISIBLE);
+                    singleton.setmDatabaseReference(singleton.getmFirebaseDatabase()
+                            .getReference()
+                            .child("users")
+                            .child(singleton.getmUser().getUid()));
+                    OnSignedInInitialize(singleton.getmUser());
+                    mProgressBar.setVisibility(ProgressBar.GONE);
                 }
                 else{
                     //User is signed out
@@ -131,11 +119,211 @@ public class HomePage extends AppCompatActivity
                                             new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build()))
                                     .setTheme(R.style.AppTheme)
                                     .build(),
-                            RC_SIGN_IN);
+                            Singleton.getRcSignIn());
                 }
             }
-        };
+        });
+
+
+        /*************************************
+         * DEFAULT CODE START                *
+         ************************************/
+        this.setTitle("Homepage");
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.setDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
+
+        /************************************
+         * INITIALIZATION OF VIEWS          *
+         ************************************/
+        View headerLayout = navigationView.getHeaderView(0);
+        imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        myVib = (Vibrator) this.getSystemService(VIBRATOR_SERVICE);
+        mUserNameView = (TextView) headerLayout.findViewById(R.id.user_name_view);
+        mEmailView = (TextView) headerLayout.findViewById(R.id.user_email_view);
+        mUserImageView = (CircleImageView) headerLayout.findViewById(R.id.user_image_view);
+        mEditText = (EditText) findViewById(R.id.edit_text_link);
+        mAddLinkButton = (ImageView) findViewById(R.id.add_link_btn);
+
+
+        /************************************
+         * Adding a listener to the EditText*
+         ************************************/
+        mEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if(s.toString().trim().length() > 0){
+                    mAddLinkButton.setBackground(getResources().getDrawable(R.drawable.ic_add_enabled));
+                    mAddLinkButton.setEnabled(true);
+                }
+                else{
+                    mAddLinkButton.setBackground(getResources().getDrawable(R.drawable.ic_add_enabled));
+                    mAddLinkButton.setEnabled(false);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+        /************************************
+         *Adding a new link to database     *
+         ************************************/
+        mEditText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(400)});
+        mAddLinkButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(mAddLinkButton.isEnabled()) {
+                    newLink = mEditText.getText().toString().trim();
+
+                    if(!newLink.startsWith("http"))
+                        newLink = "https://" + newLink;
+
+                    if(singleton.getmLinksMap().containsKey(newLink)){
+                        AlertDialog.Builder adb=new AlertDialog.Builder(HomePage.this);
+                        adb.setTitle("Duplicate found!");
+                        adb.setMessage("Link already exists in you list");
+                        adb.setNegativeButton("OK", null);
+                        adb.show();
+                    } else {
+                        try {
+                            mEditText.clearFocus();
+                            imm.toggleSoftInput(InputMethodManager.RESULT_HIDDEN, 0);
+                            mEditText.setText("");
+                            Document d = Jsoup.connect(newLink).get();
+
+                            Element e1 = d.head().select("link[href~=.*\\.(ico|png)]").first();
+                            String logoURL = e1.attr("href");
+                            if (logoURL == null || logoURL.length() == 0) {
+                                Element e2 = d.head().select("meta[itemprop=image]").first();
+                                logoURL = e2.attr("itemprop");
+                            }
+
+                            BasicLinkInfo bLink = new BasicLinkInfo(newLink, d.title(), logoURL);
+                            String key = singleton.getmDatabaseReference().push().getKey();
+                            bLink.setPushKey(key);
+                            singleton.getmDatabaseReference().child(key).setValue(bLink);
+
+                        } catch (Exception e) {
+                            Toast.makeText(HomePage.this, e.getMessage(), Toast.LENGTH_LONG).show();
+                            mEditText.requestFocus();
+                            myVib.vibrate(50);
+                        }
+                    }
+                }
+            }
+        });
+
     }
+
+    private void attachDatabaseReadListener(){
+        if(singleton.getmLinksEvenListener() == null) {
+            singleton.setmLinksEvenListener(new ChildEventListener() {
+                @Override
+                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                    BasicLinkInfo linkInfo = dataSnapshot.getValue(BasicLinkInfo.class);
+                    singleton.addToAllLinks(linkInfo);
+                    mBasicLinkAdapter.notifyDataSetChanged();
+                }
+
+                @Override
+                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                    mBasicLinkAdapter.notifyDataSetChanged();
+                }
+
+                @Override
+                public void onChildRemoved(DataSnapshot dataSnapshot) {
+                    BasicLinkInfo removedLink = dataSnapshot.getValue(BasicLinkInfo.class);
+                    mBasicLinkAdapter.remove(removedLink);
+                }
+
+                @Override
+                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                }
+            });
+            singleton.getmDatabaseReference().addChildEventListener(singleton.getmLinksEvenListener());
+        }
+    }
+
+    private void  detachDatabaseReadListener(){
+        if(singleton.getmLinksEvenListener() != null) {
+            singleton.getmDatabaseReference().removeEventListener(singleton.getmLinksEvenListener());
+            singleton.setmLinksEvenListener(null);
+        }
+    }
+
+    private void OnSignedInInitialize(FirebaseUser user){
+        mUserName = user.getDisplayName();
+        mEmail = user.getEmail();
+        mImageUri = user.getPhotoUrl();
+        attachDatabaseReadListener();
+        if(mUserNameView!=null && mUserImageView != null && mEmailView != null) {
+            mUserNameView.setText(mUserName);
+            mEmailView.setText(mEmail);
+            Glide.with(HomePage.this).load(mImageUri).asBitmap().into(mUserImageView);
+        }
+    }
+
+    private void OnSignedOutCleanUp(){
+        mUserName = ANONYMOUS;
+        mEmail = ANONYMOUS;
+        mImageUri = null;
+        mBasicLinkAdapter.clear();
+        detachDatabaseReadListener();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        singleton.getmFirebaseAuth().removeAuthStateListener(singleton.getmAuthStateListener());
+        detachDatabaseReadListener();
+        mBasicLinkAdapter.clear();
+    }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        singleton.getmFirebaseAuth().addAuthStateListener(singleton.getmAuthStateListener());
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == Singleton.getRcSignIn()){
+            if(resultCode == RESULT_OK){
+                //Came out of sign in screen
+            }
+            else if (resultCode == RESULT_CANCELED){
+                Toast.makeText(HomePage.this, "Signin Cancled", Toast.LENGTH_LONG).show();
+                finish();
+            }
+        }
+    }
+
+    /************************************
+     *  UI Functions starts from here   *
+     ************************************/
 
     @Override
     public void onBackPressed() {
@@ -174,17 +362,13 @@ public class HomePage extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-        //Fragment fragment = null;
-        //Class fragmentClass = null;
         if (id == R.id.nav_home) {
 
         } else if (id == R.id.nav_videos) {
-            Intent intent = new Intent(this, LinkView.class);
-            startActivity(intent);
+
         } else if (id == R.id.nav_images) {
 
         } else if (id == R.id.nav_pages) {
-            //fragmentClass = BlankFragment.class;
 
         } else if (id == R.id.nav_share) {
 
@@ -195,121 +379,8 @@ public class HomePage extends AppCompatActivity
             AuthUI.getInstance().signOut(this);
         }
 
-        /*
-        try {
-            fragment = (Fragment) fragmentClass.newInstance();
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            fragmentManager.beginTransaction().replace(R.id.flContent, fragment).commit();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        */
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
-    }
-
-    private void attachDatabaseReadListener(){
-        mChildEvenListener = new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                Toast.makeText(HomePage.this, dataSnapshot.toString(), Toast.LENGTH_LONG).show();
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-            }
-        };
-        mUserDatabaseReference.addChildEventListener(mChildEvenListener);
-    }
-
-    private void OnSignedInInitialize(FirebaseUser user){
-        attachDatabaseReadListener();
-        mUserName = user.getDisplayName();
-        mEmail = user.getEmail();
-        mImageUri = user.getPhotoUrl();
-        //Toast.makeText(HomePage.this, "Successfully signed as " + mEmail, Toast.LENGTH_LONG).show();
-        if(mUserNameView!=null && mUserImageView != null && mEmailView != null) {
-            mUserNameView.setText(mUserName);
-            mEmailView.setText(mEmail);
-            Glide.with(HomePage.this).load(mImageUri).asBitmap().into(mUserImageView);
-            //Picasso.with(HomePage.this).load(mImageUri).into(mUserImageView);
-        }
-    }
-
-    private void OnSignedOutCleanUp(){
-        mUserName = ANONYMOUS;
-        mEmail = ANONYMOUS;
-        mImageUri = null;
-        mDatabaseReference = mFirebaseDatabase.getReference().child("users");
-        clearItems();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        mFirebaseAuth.addAuthStateListener(mAuthStateListener);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        mFirebaseAuth.removeAuthStateListener(mAuthStateListener);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == RC_SIGN_IN){
-            if(resultCode == RESULT_OK){
-                //Came out of sign in screen
-            }
-            else if (resultCode == RESULT_CANCELED){
-                Toast.makeText(HomePage.this, "Signin Cancled", Toast.LENGTH_LONG).show();
-                finish();
-            }
-        }
-    }
-
-    public void setItem(int index, LinkClass item)
-    {
-        links.set(index, item);
-        //mLinksAdapter.notifyItemChanged(index);
-    }
-    // Use this to add an item
-    public void addItem(LinkClass item)
-    {
-        links.add(item);
-        //mLinksAdapter.notifyItemInserted(links.size() - 1);
-    }
-    // Use this to remove an item
-    public void removeItem(int index)
-    {
-        links.remove(index);
-        //mLinksAdapter.notifyItemRemoved(index);
-    }
-
-    public void clearItems(){
-        links.clear();
-        //mLinksAdapter.notifyDataSetChanged();
-    }
-
-    public void insertView(View view){
-        LinkClass link = new LinkClass("Hello");
-        mUserDatabaseReference.child("links").push().setValue("https://www.youtube.com/watch?v=1FJHYqE0RDg");
-        addItem(link);
     }
 }
