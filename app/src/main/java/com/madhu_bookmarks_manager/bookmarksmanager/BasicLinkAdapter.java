@@ -39,11 +39,13 @@ public class BasicLinkAdapter extends ArrayAdapter<BasicLinkInfo>{
     @Override
     public View getView(int position, View convertView, @NonNull ViewGroup parent) {
         // Check if the existing view is being reused, otherwise inflate the view
-        View listItemView = convertView;
+        View listItemView;
 
         mListView = (ListView) parent;
-        if(listItemView == null) {
+        if(convertView == null) {
             listItemView = ((Activity) getContext()).getLayoutInflater().inflate(R.layout.link_card_large, parent, false);
+        } else {
+            listItemView = convertView;
         }
 
         listItemView.setHasTransientState(true);
@@ -74,7 +76,7 @@ public class BasicLinkAdapter extends ArrayAdapter<BasicLinkInfo>{
         else{
             linkImage.setImageDrawable(null);
             linkLetter.setVisibility(View.VISIBLE);
-            linkLetter.setText(""+text.charAt(0));
+            linkLetter.setText(""+Character.toUpperCase(text.charAt(0)));
             int color = basicLinkInfo.getmColor();
             linkImage.setBackgroundColor(Constants.COLORS[color]);
         }
@@ -82,13 +84,13 @@ public class BasicLinkAdapter extends ArrayAdapter<BasicLinkInfo>{
         CircleImageView logoImage = (CircleImageView) listItemView.findViewById(R.id.linkLogo);
         Glide.with(listItemView.getContext()).load(basicLinkInfo.getmLogo()).asBitmap().into(logoImage);
 
-        ImageView mFavicon = (ImageView) listItemView.findViewById(R.id.favicon);
-        mFavicon.setOnClickListener(vdClickListener);
+        ImageView favView = (ImageView) listItemView.findViewById(R.id.favicon);
+        favView.setOnClickListener(vdClickListener);
 
         ImageView mRemoveBut = (ImageView) listItemView.findViewById(R.id.remove_button);
         mRemoveBut.setOnClickListener(removeButtonListener);
 
-        ImageView favView = (ImageView) listItemView.findViewById(R.id.favicon);
+
         if(basicLinkInfo.isFavourite()) {
             favView.setImageDrawable(getContext().getResources().getDrawable(R.drawable.ic_fav));
         }
@@ -107,7 +109,6 @@ public class BasicLinkAdapter extends ArrayAdapter<BasicLinkInfo>{
             int x = mListView.getPositionForView((View) v.getParent());
             v.setHasTransientState(true);
             BasicLinkInfo obj = singleton.getmAllLinks().get(x);
-            ImageView ico = (ImageView) v;
             int vId = v.getId();
 
             if(vId == R.id.favicon) {
@@ -139,10 +140,12 @@ public class BasicLinkAdapter extends ArrayAdapter<BasicLinkInfo>{
                 adb.setPositiveButton("Ok", new AlertDialog.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         singleton.removeFromAllLinks(positionToRemove);
-                        notifyDataSetChanged();
+                        //notifyDataSetChanged();
                     }});
                 adb.show();
             }
         }
     };
+
+
 }

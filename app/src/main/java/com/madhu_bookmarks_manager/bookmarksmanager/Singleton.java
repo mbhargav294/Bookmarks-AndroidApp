@@ -34,14 +34,6 @@ class Singleton {
     private ArrayList<BasicLinkInfo> mAllLinks;
     private HashMap<String, String> mLinksMap;
 
-    public ArrayList<BasicLinkInfo> getmFavouritesList() {
-        return mFavouritesList;
-    }
-
-    public void setmFavouritesList(ArrayList<BasicLinkInfo> mFavouritesList) {
-        this.mFavouritesList = mFavouritesList;
-    }
-
     private ArrayList<BasicLinkInfo> mFavouritesList;
     private ArrayList<BasicLinkInfo> mYoutubeList;
     private ArrayList<BasicLinkInfo> mWikiList;
@@ -129,6 +121,14 @@ class Singleton {
         mLinksMap.put(linkInfo.getmUrl(), linkInfo.getPushKey());
         if(linkInfo.isFavourite()){
             mFavouritesList.add(linkInfo);
+
+        String category = linkInfo.getCategory();
+        if(category.equals("Youtube"))
+            mYoutubeList.add(linkInfo);
+        else if(category.equals("Stack"))
+            mStackList.add(linkInfo);
+        else if(category.equals("Wiki"))
+            mWikiList.add(linkInfo);
         }
     }
 
@@ -146,14 +146,34 @@ class Singleton {
         String pushString = this.mLinksMap.get(key);
         pLink.setFavourite(state);
         mDatabaseReference.child(pushString).setValue(mAllLinks.get(position));
+        String favourite = "";
         if(state){
-            if(!mFavouritesList.contains(pLink))
+            if(!mFavouritesList.contains(pLink)) {
                 mFavouritesList.add(pLink);
+                favourite = "Added to Favourites \uD83D\uDE04";
+            }
         }
         else {
             mFavouritesList.remove(pLink);
+            favourite = "Removed from Favourites \uD83D\uDE1E";
         }
-        Toast.makeText(t, ""+mFavouritesList.size(), Toast.LENGTH_LONG).show();
+        Toast.makeText(t, favourite, Toast.LENGTH_SHORT).show();
+    }
+
+    public ArrayList<BasicLinkInfo> getmFavouritesList() {
+        return mFavouritesList;
+    }
+
+    public ArrayList<BasicLinkInfo> getmYoutubeList() {
+        return mYoutubeList;
+    }
+
+    public ArrayList<BasicLinkInfo> getmWikiList() {
+        return mWikiList;
+    }
+
+    public ArrayList<BasicLinkInfo> getmStackList() {
+        return mStackList;
     }
 
     HashMap<String, String> getmLinksMap() {

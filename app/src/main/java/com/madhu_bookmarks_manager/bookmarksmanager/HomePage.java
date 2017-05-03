@@ -17,6 +17,7 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -196,6 +197,7 @@ public class HomePage extends AppCompatActivity
             }
         });
 
+
         /************************************
          *Adding a new link to database     *
          ************************************/
@@ -214,6 +216,7 @@ public class HomePage extends AppCompatActivity
                         adb.setTitle("Duplicate found!");
                         adb.setMessage("Link already exists in you list");
                         adb.setNegativeButton("OK", null);
+                        mEditText.setText("");
                         adb.show();
                     } else {
                         try {
@@ -234,6 +237,7 @@ public class HomePage extends AppCompatActivity
     }
 
     private void parseLinks(String newLink) throws IOException {
+        Log.v("HELLO FROM OTHER SIDE", newLink);
         Document d = Jsoup.connect(newLink).get();
 
         Element e1 = d.head().select("link[href~=.*\\.(ico|png)]").first();
@@ -379,23 +383,30 @@ public class HomePage extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
+        Intent intent = null;
         if (id == R.id.nav_home) {
 
         } else if (id == R.id.nav_youtube) {
-
+            intent = new Intent(HomePage.this, FavouritesView.class);
+            intent.putExtra("Name", "YouTube");
         } else if (id == R.id.nav_wiki) {
-
+            intent = new Intent(HomePage.this, FavouritesView.class);
+            intent.putExtra("Name", "Wikipedia");
         } else if (id == R.id.nav_stack) {
-
+            intent = new Intent(HomePage.this, FavouritesView.class);
+            intent.putExtra("Name", "StackExchange");
         } else if(id == R.id.nav_favourites){
-            Intent intent = new Intent(HomePage.this, FavouritesView.class);
-            startActivity(intent);
+            intent = new Intent(HomePage.this, FavouritesView.class);
+            intent.putExtra("Name", "Favourites");
         } else if (id == R.id.settings){
 
         }
         else if(id == R.id.sign_out){
             AuthUI.getInstance().signOut(this);
         }
+
+        if(intent != null)
+            startActivity(intent);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
